@@ -1,9 +1,9 @@
 using BepuPhysics;
 
-namespace Engine.Physics.Bepu;
+namespace Engine;
 
 /// <summary>Per-frame stepping (fixed-timestep accumulator) and ECS transform write-back.</summary>
-internal sealed partial class BepuPhysicsWorld
+public sealed partial class PhysicsWorld
 {
     /// <inheritdoc />
     public void Step(float deltaSeconds)
@@ -19,6 +19,7 @@ internal sealed partial class BepuPhysicsWorld
                 _accumulator -= _settings.FixedTimeStep;
                 steps++;
             }
+
             if (steps == _settings.MaxStepsPerFrame)
                 _accumulator = 0f; // avoid spiral of death
         }
@@ -45,4 +46,3 @@ internal sealed partial class BepuPhysicsWorld
         }
     }
 }
-

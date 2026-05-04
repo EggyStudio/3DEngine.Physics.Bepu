@@ -6,7 +6,7 @@ using BepuPhysics.CollisionDetection;
 using BepuPhysics.Constraints;
 using BepuUtilities;
 
-namespace Engine.Physics.Bepu;
+namespace Engine;
 
 /// <summary>
 /// Per-pair material accept/configure callbacks. Filters out static-static and
@@ -30,14 +30,16 @@ internal struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     public void Initialize(Simulation simulation) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
+    public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b,
+        ref float speculativeMargin)
         => a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool AllowContactGeneration(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB) => true;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial)
+    public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold,
+        out PairMaterialProperties pairMaterial)
         where TManifold : unmanaged, IContactManifold<TManifold>
     {
         pairMaterial.FrictionCoefficient = Friction;
@@ -47,7 +49,8 @@ internal struct BepuNarrowPhaseCallbacks : INarrowPhaseCallbacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB, ref ConvexContactManifold manifold) => true;
+    public bool ConfigureContactManifold(int workerIndex, CollidablePair pair, int childIndexA, int childIndexB,
+        ref ConvexContactManifold manifold) => true;
 
     public void Dispose() { }
 }
@@ -76,12 +79,10 @@ internal struct BepuPoseIntegratorCallbacks : IPoseIntegratorCallbacks
         _angularDampingDt = new Vector<float>(MathF.Pow(MathF.Max(1e-7f, 1 - AngularDamping), dt));
     }
 
-    public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation,
-        BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt,
+    public void IntegrateVelocity(Vector<int> bodyIndices, Vector3Wide position, QuaternionWide orientation, BodyInertiaWide localInertia, Vector<int> integrationMask, int workerIndex, Vector<float> dt,
         ref BodyVelocityWide velocity)
     {
         velocity.Linear = (velocity.Linear + _gravityDt) * _linearDampingDt;
         velocity.Angular = velocity.Angular * _angularDampingDt;
     }
 }
-

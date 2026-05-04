@@ -5,10 +5,10 @@ using BepuPhysics.Collidables;
 using BepuPhysics.CollisionDetection;
 using BepuPhysics.Trees;
 
-namespace Engine.Physics.Bepu;
+namespace Engine;
 
 /// <summary>Spatial queries: raycasts (and future overlap / sweep tests).</summary>
-internal sealed partial class BepuPhysicsWorld
+public sealed partial class PhysicsWorld
 {
     /// <inheritdoc />
     public bool Raycast(Vector3 origin, Vector3 direction, float maxDistance, out RaycastHit hit)
@@ -20,6 +20,7 @@ internal sealed partial class BepuPhysicsWorld
             hit = default;
             return false;
         }
+
         var coll = handler.Collidable;
         BodyKind kind = coll.Mobility == CollidableMobility.Static
             ? BodyKind.Static
@@ -49,10 +50,13 @@ internal sealed partial class BepuPhysicsWorld
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllowTest(CollidableReference collidable) => true;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllowTest(CollidableReference collidable, int childIndex) => true;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal, CollidableReference collidable, int childIndex)
+        public void OnRayHit(in RayData ray, ref float maximumT, float t, Vector3 normal,
+            CollidableReference collidable, int childIndex)
         {
             if (!Found || t < T)
             {
@@ -65,5 +69,3 @@ internal sealed partial class BepuPhysicsWorld
         }
     }
 }
-
-

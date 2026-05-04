@@ -4,13 +4,14 @@ using BepuPhysics.Collidables;
 using BepuMesh = BepuPhysics.Collidables.Mesh;
 using BepuBox = BepuPhysics.Collidables.Box;
 
-namespace Engine.Physics.Bepu;
+namespace Engine;
 
 /// <summary>Body and static collider creation: dynamic, kinematic, and static factories for every supported shape.</summary>
-internal sealed partial class BepuPhysicsWorld
+public sealed partial class PhysicsWorld
 {
     /// <summary>Wraps a shape index in a <see cref="CollidableDescription"/> with the engine's default speculative margin.</summary>
-    private static CollidableDescription Coll(TypedIndex shape) => new(shape, 0.1f);
+    private static CollidableDescription Coll(TypedIndex shape) => 
+        new(shape, 0.1f);
 
     /// <summary>Registers a convex shape and adds a dynamic body for it, returning the engine handle.</summary>
     private PhysicsBody RegisterDynamic<TShape>(in TShape shape, Vector3 position, float mass, PhysicsMaterial? material, int entityId)
@@ -61,43 +62,46 @@ internal sealed partial class BepuPhysicsWorld
     // -- Dynamic --
 
     /// <inheritdoc />
-    public PhysicsBody CreateSphere(Vector3 position, float radius, float mass = 1, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterDynamic(new Sphere(radius), position, mass, material, entityId);
+    public PhysicsBody CreateSphere(Vector3 position, float radius, float mass = 1, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterDynamic(new Sphere(radius), position, mass, material, entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateBox(Vector3 position, Vector3 halfExtents, float mass = 1, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterDynamic(new BepuBox(halfExtents.X * 2, halfExtents.Y * 2, halfExtents.Z * 2), position, mass, material, entityId);
+    public PhysicsBody CreateBox(Vector3 position, Vector3 halfExtents, float mass = 1, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterDynamic(new BepuBox(halfExtents.X * 2, halfExtents.Y * 2, halfExtents.Z * 2), position, mass, material,
+            entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateCapsule(Vector3 position, float radius, float height, float mass = 1, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterDynamic(new Capsule(radius, height), position, mass, material, entityId);
+    public PhysicsBody CreateCapsule(Vector3 position, float radius, float height, float mass = 1, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterDynamic(new Capsule(radius, height), position, mass, material, entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateCylinder(Vector3 position, float radius, float height, float mass = 1, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterDynamic(new Cylinder(radius, height), position, mass, material, entityId);
+    public PhysicsBody CreateCylinder(Vector3 position, float radius, float height, float mass = 1, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterDynamic(new Cylinder(radius, height), position, mass, material, entityId);
 
     // -- Static --
 
     /// <inheritdoc />
-    public PhysicsBody CreateStaticSphere(Vector3 position, float radius, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterStatic(new Sphere(radius), position, entityId);
+    public PhysicsBody CreateStaticSphere(Vector3 position, float radius, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterStatic(new Sphere(radius), position, entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateStaticBox(Vector3 position, Vector3 halfExtents, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterStatic(new BepuBox(halfExtents.X * 2, halfExtents.Y * 2, halfExtents.Z * 2), position, entityId);
+    public PhysicsBody CreateStaticBox(Vector3 position, Vector3 halfExtents, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterStatic(new BepuBox(halfExtents.X * 2, halfExtents.Y * 2, halfExtents.Z * 2), position, entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateStaticCapsule(Vector3 position, float radius, float height, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterStatic(new Capsule(radius, height), position, entityId);
+    public PhysicsBody CreateStaticCapsule(Vector3 position, float radius, float height, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterStatic(new Capsule(radius, height), position, entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateGroundPlane(float y = 0, float halfSize = 500, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterStatic(new BepuBox(halfSize * 2, 1f, halfSize * 2), new Vector3(0, y - 0.5f, 0), entityId);
+    public PhysicsBody CreateGroundPlane(float y = 0, float halfSize = 500, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterStatic(new BepuBox(halfSize * 2, 1f, halfSize * 2), new Vector3(0, y - 0.5f, 0), entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateStaticMesh(Vector3 position, ReadOnlySpan<Vector3> vertices, ReadOnlySpan<int> indices, PhysicsMaterial? material = null, int entityId = 0)
+    public PhysicsBody CreateStaticMesh(Vector3 position, ReadOnlySpan<Vector3> vertices, ReadOnlySpan<int> indices,
+        PhysicsMaterial? material = null, int entityId = 0)
     {
-        if (indices.Length % 3 != 0) throw new ArgumentException("indices length must be a multiple of 3.", nameof(indices));
+        if (indices.Length % 3 != 0)
+            throw new ArgumentException("indices length must be a multiple of 3.", nameof(indices));
         int triCount = indices.Length / 3;
         BufferPool.Take<Triangle>(triCount, out var triangles);
         for (int i = 0; i < triCount; i++)
@@ -107,6 +111,7 @@ internal sealed partial class BepuPhysicsWorld
                 vertices[indices[i * 3 + 1]],
                 vertices[indices[i * 3 + 2]]);
         }
+
         var mesh = new BepuMesh(triangles, Vector3.One, BufferPool);
         var idx = Simulation.Shapes.Add(mesh);
         var handle = Simulation.Statics.Add(new StaticDescription(position, Quaternion.Identity, idx));
@@ -117,15 +122,16 @@ internal sealed partial class BepuPhysicsWorld
     // -- Kinematic --
 
     /// <inheritdoc />
-    public PhysicsBody CreateKinematicSphere(Vector3 position, float radius, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterKinematic(new Sphere(radius), position, material, entityId);
+    public PhysicsBody CreateKinematicSphere(Vector3 position, float radius, PhysicsMaterial? material = null,
+        int entityId = 0) =>
+        RegisterKinematic(new Sphere(radius), position, material, entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateKinematicBox(Vector3 position, Vector3 halfExtents, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterKinematic(new BepuBox(halfExtents.X * 2, halfExtents.Y * 2, halfExtents.Z * 2), position, material, entityId);
+    public PhysicsBody CreateKinematicBox(Vector3 position, Vector3 halfExtents, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterKinematic(new BepuBox(halfExtents.X * 2, halfExtents.Y * 2, halfExtents.Z * 2), position, material,
+            entityId);
 
     /// <inheritdoc />
-    public PhysicsBody CreateKinematicCapsule(Vector3 position, float radius, float height, PhysicsMaterial? material = null, int entityId = 0)
-        => RegisterKinematic(new Capsule(radius, height), position, material, entityId);
+    public PhysicsBody CreateKinematicCapsule(Vector3 position, float radius, float height, PhysicsMaterial? material = null, int entityId = 0) =>
+        RegisterKinematic(new Capsule(radius, height), position, material, entityId);
 }
-

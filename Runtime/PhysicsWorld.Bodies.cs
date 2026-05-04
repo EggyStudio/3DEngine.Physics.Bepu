@@ -1,17 +1,19 @@
 using System.Numerics;
 using BepuPhysics;
 
-namespace Engine.Physics.Bepu;
+namespace Engine;
 
 /// <summary>Per-body operations: existence, pose, velocity, impulses, sleep state, destruction.</summary>
-internal sealed partial class BepuPhysicsWorld
+public sealed partial class PhysicsWorld
 {
     /// <inheritdoc />
     public bool Exists(PhysicsBody body)
     {
         if (body.Kind == BodyKind.Static)
-            return Simulation.Statics.HandleToIndex.Length > body.Handle && Simulation.Statics.HandleToIndex[body.Handle] >= 0;
-        return Simulation.Bodies.HandleToLocation.Length > body.Handle && Simulation.Bodies.HandleToLocation[body.Handle].SetIndex >= 0;
+            return Simulation.Statics.HandleToIndex.Length > body.Handle &&
+                   Simulation.Statics.HandleToIndex[body.Handle] >= 0;
+        return Simulation.Bodies.HandleToLocation.Length > body.Handle &&
+               Simulation.Bodies.HandleToLocation[body.Handle].SetIndex >= 0;
     }
 
     /// <inheritdoc />
@@ -34,14 +36,16 @@ internal sealed partial class BepuPhysicsWorld
     /// <inheritdoc />
     public Vector3 GetPosition(PhysicsBody body)
     {
-        if (body.Kind == BodyKind.Static) return Simulation.Statics.GetStaticReference(new StaticHandle(body.Handle)).Pose.Position;
+        if (body.Kind == BodyKind.Static)
+            return Simulation.Statics.GetStaticReference(new StaticHandle(body.Handle)).Pose.Position;
         return Simulation.Bodies.GetBodyReference(new BodyHandle(body.Handle)).Pose.Position;
     }
 
     /// <inheritdoc />
     public Quaternion GetRotation(PhysicsBody body)
     {
-        if (body.Kind == BodyKind.Static) return Simulation.Statics.GetStaticReference(new StaticHandle(body.Handle)).Pose.Orientation;
+        if (body.Kind == BodyKind.Static)
+            return Simulation.Statics.GetStaticReference(new StaticHandle(body.Handle)).Pose.Orientation;
         return Simulation.Bodies.GetBodyReference(new BodyHandle(body.Handle)).Pose.Orientation;
     }
 
@@ -89,11 +93,15 @@ internal sealed partial class BepuPhysicsWorld
 
     /// <inheritdoc />
     public Vector3 GetLinearVelocity(PhysicsBody body)
-        => body.Kind == BodyKind.Static ? Vector3.Zero : Simulation.Bodies.GetBodyReference(new BodyHandle(body.Handle)).Velocity.Linear;
+        => body.Kind == BodyKind.Static
+            ? Vector3.Zero
+            : Simulation.Bodies.GetBodyReference(new BodyHandle(body.Handle)).Velocity.Linear;
 
     /// <inheritdoc />
     public Vector3 GetAngularVelocity(PhysicsBody body)
-        => body.Kind == BodyKind.Static ? Vector3.Zero : Simulation.Bodies.GetBodyReference(new BodyHandle(body.Handle)).Velocity.Angular;
+        => body.Kind == BodyKind.Static
+            ? Vector3.Zero
+            : Simulation.Bodies.GetBodyReference(new BodyHandle(body.Handle)).Velocity.Angular;
 
     /// <inheritdoc />
     public void SetLinearVelocity(PhysicsBody body, Vector3 velocity)
@@ -154,4 +162,3 @@ internal sealed partial class BepuPhysicsWorld
         br.Awake = false;
     }
 }
-
